@@ -13,10 +13,16 @@ st.set_page_config(
 )
 st.title("🤖 Generative AI Chatbot")
 
-llm = ChatGroq(
-        model="llama-3.3-70b-versatile",
-        temperature=0.0
-    )
+model_choice = st.selectbox(
+    "Select Model",
+    ("OpenAI", "Llama"),
+    label_visibility="collapsed", # Hide the label to save space
+)
+
+if model_choice == 'OpenAI':
+    model = 'openai/gpt-oss-safeguard-20b'
+elif model_choice == 'Llama':
+    model = 'llama-3.3-70b-versatile'
 
 # initialize the chat history
 if "chat_history" not in st.session_state:
@@ -28,9 +34,15 @@ for message in st.session_state.chat_history:
 
 user_input = st.chat_input("Ask chatbot...")
 
+
 if user_input:
     st.chat_message("user").markdown(user_input)
     st.session_state.chat_history.append({"role": "user", "content": user_input})
+
+    llm = ChatGroq(
+        model=model,
+        temperature=0.0
+    )
 
     response = llm.invoke(
         input = [{"role": "system", "content": "You are a helpful assistant."}, *st.session_state.chat_history]
